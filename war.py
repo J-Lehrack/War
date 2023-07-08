@@ -28,9 +28,11 @@ class WarDeck(game_cards.Deck):
 
 class WarHand(game_cards.Hand):
     """A hand in War (1 card only)"""
-    def __init__(self, name):
+
+    def __init__(self, name, score=0):
         super(WarHand, self).__init__()
         self.name = name
+        self.score = score
 
     def __str__(self):
         rep = self.name + ":\t" + super(WarHand, self).__str__()
@@ -71,8 +73,18 @@ class WarPlayer(WarHand):
     def win(self):
         print(self.name, "wins")
 
-    def war(self):
+    @staticmethod
+    def war():
         print("Its a War!!")
+
+    def score_up(self):
+        self.score += 1
+
+    def display_score(self):
+        print(f"{self.name}'s current score: {self.score}")
+
+    def final_score(self):
+        print(f"{self.name}'s score: {self.score}")
 
 
 class WarComputer(WarHand):
@@ -83,6 +95,15 @@ class WarComputer(WarHand):
 
     def win(self):
         print(self.name, "wins")
+
+    def score_up(self):
+        self.score += 1
+
+    def display_score(self):
+        print(f"{self.name}'s current score: {self.score}")
+
+    def final_score(self):
+        print(f"{self.name}'s score: {self.score}")
 
 
 class WarGame(object):
@@ -107,27 +128,40 @@ class WarGame(object):
             print(player)
         print(self.computer)
 
-        for player in self.players:
-            if player.total > self.computer.total:
-                player.win()
+        while self.deck is True:
+            for player in self.players:
+                if player.total > self.computer.total:
+                    player.win()
+                    player.score_up()
+                    player.display_score()
+                    self.computer.display_score()
 
-            elif player.total < self.computer.total:
-                player.lose()
+                elif player.total < self.computer.total:
+                    player.lose()
+                    self.computer.score_up()
+                    player.display_score()
+                    self.computer.display_score()
 
-            elif player.total == self.computer.total:
-                player.war()
-                self.deck.deal(self.players + [self.computer], per_hand=1)
-                print(player)
-                print(self.computer)
+                elif player.total == self.computer.total:
+                    player.war()
+                    WarGame.play(self)
 
+                else:
+                    print("I don't know what to do anymore?!?!")
+
+                player.clear()
+            self.computer.clear()
+
+        else:
+            reshuffle = game_questions.ask_yes_no("\nDo you want to reshuffle? (y/n): ")
+            while reshuffle != "n":
+                self.deck.populate()
+                self.deck.shuffle()
+                WarGame.play(self)
             else:
-                print("I don't know what to do anymore?!?!")
-
-            player.clear()
-        self.computer.clear()
-
-        self.deck.populate()
-        self.deck.shuffle()
+                for player in self.players:
+                    player.final_score()
+                    self.computer.final_score()
 
 
 def main():
@@ -144,7 +178,7 @@ def main():
     again = None
     while again != "n":
         game.play()
-        again = game_questions.ask_yes_no("\nDo you want to play again: ")
+        again = game_questions.ask_yes_no("\nDo you want to play again? (y/n): ")
 
 
 main()
