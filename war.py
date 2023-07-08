@@ -25,6 +25,10 @@ class WarDeck(game_cards.Deck):
             for rank in WarCard.RANKS:
                 self.cards.append(WarCard(rank, suit))
 
+    def is_empty(self):
+        check = self.cards
+        return check
+
 
 class WarHand(game_cards.Hand):
     """A hand in War (1 card only)"""
@@ -127,8 +131,9 @@ class WarGame(object):
         for player in self.players:
             print(player)
         print(self.computer)
+        not_empty = self.deck.is_empty()
 
-        while self.deck is True:
+        if len(not_empty) != 0:
             for player in self.players:
                 if player.total > self.computer.total:
                     player.win()
@@ -152,19 +157,25 @@ class WarGame(object):
                 player.clear()
             self.computer.clear()
 
-        else:
+        elif len(not_empty) == 0:
+            for player in self.players:
+                player.final_score()
+                self.computer.final_score()
             reshuffle = game_questions.ask_yes_no("\nDo you want to reshuffle? (y/n): ")
-            while reshuffle != "n":
+            if reshuffle == "y":
                 self.deck.populate()
                 self.deck.shuffle()
                 WarGame.play(self)
+            elif reshuffle == "n":
+                print("Thank you for playing.")
             else:
-                for player in self.players:
-                    player.final_score()
-                    self.computer.final_score()
+                print("Please use y/n")
+
+        else:
+            print("Houston we have an issue.")
 
 
-def main():
+if __name__ == "__main__":
     print("\t\tWelcome to War!\n")
 
     names = []
@@ -178,8 +189,6 @@ def main():
     again = None
     while again != "n":
         game.play()
-        again = game_questions.ask_yes_no("\nDo you want to play again? (y/n): ")
-
-
-main()
-input("\n\nPress any key to exit.")
+        again = game_questions.ask_yes_no("\nContinue? (y/n) ")
+    else:
+        print("Thank you for playing")
